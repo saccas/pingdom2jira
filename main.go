@@ -6,19 +6,28 @@ import (
 	"os"
 )
 
+const configFileEnv = "CONFIG_FILE"
+
 // App holds the parsed flag values.
 type App struct {
 	address    string
 	mode       string
 	configFile string
+	version    bool
 }
 
 func main() {
 	var app App
 	flag.StringVar(&app.address, "a", ":8080", "ip:port to listen on (runs as lambda if empty)")
+	flag.StringVar(&app.configFile, "c", "./config.yaml", "name of the config file (alternatively the config file be specified via environment variable '%s')")
 	flag.StringVar(&app.mode, "m", "local", "mode, can me either 'local', 'azurefunc' or 'awslambda'")
-	flag.StringVar(&app.configFile, "c", "./config.yaml", "name of the config file")
+	flag.BoolVar(&app.version, "v", false, "print version information")
 	flag.Parse()
+
+	envConfig := os.Getenv(configFileEnv)
+	if envConfig != "" {
+		app.configFile = envConfig
+	}
 
 	if app.version {
 		fmt.Println(versionInfo())

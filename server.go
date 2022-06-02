@@ -41,7 +41,7 @@ func NewServer(listener string, c *Config) (*Server, error) {
 
 	r := mux.NewRouter().StrictSlash(true)
 	routes := s.Routes()
-	routes.Populate(r, "api")
+	routes.Populate(r, c.PathPrefix)
 	s.handler = alice.New(s.LoggerMiddleware).Then(r)
 	return s, nil
 }

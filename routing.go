@@ -7,7 +7,7 @@ import (
 func (s Server) Routes() r.Route {
 	return r.Route{
 		R: r.Routes{
-			"hooks": {
+			"hook": {
 				H: r.Handlers{
 					"POST": {F: s.HookHandler, Q: []*r.QueryParam{}},
 				},

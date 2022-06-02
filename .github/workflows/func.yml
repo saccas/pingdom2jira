@@ -1,0 +1,69 @@
+name: Release
+
+on:
+  create:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      -
+        name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+      -
+        name: Build
+        run: go build -v ./...
+        env:
+          GOOS: linux
+          GOARCH: amd64
+          CGO_ENABLED: 0
+      -
+        name: Prepare
+        run: |
+          mkdir package
+          cp pingdom2jira package/
+          cp README.md package/
+          cp -r misc/azure_func/* package/
+      -
+        name: Install Zip
+        uses: montudor/action-zip@v1
+      -
+        name: Zip
+        run: zip -qq -r azure_function.zip .
+        working-directory: package/
+      -
+        name: Upload
+        uses: actions/upload-artifact@v1
+        with:
+          name: azure_function.zip
+          path: package/azure_function.zip
+      -
+        name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: false
+      -
+        name: upload linux artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: package/azure_function.zip
+          asset_name: azure_function.zip
+          asset_content_type: application/zip

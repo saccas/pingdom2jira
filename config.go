@@ -9,7 +9,8 @@ import (
 
 // Config holds the whole configuration.
 type Config struct {
-	Pingdom struct {
+	PathPrefix string `yaml:"path_prefix"`
+	Pingdom    struct {
 		Token string `yaml:"token"`
 	} `yaml:"pingdom"`
 	Jira struct {
